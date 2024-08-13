@@ -1,9 +1,9 @@
-import Hero from "./components/Custom/Hero";
+import Layout from "./components/layout/Layout";
 
 function App() {
   return (
     <>
-      <Hero />
+      <Layout />
     </>
   );
 }

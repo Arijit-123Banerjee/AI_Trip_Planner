@@ -1,17 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePlaceContext } from "@/PlaceContext";
+import { AI_PROMPT } from "@/components/constant/Option";
+import { chatSession } from "@/Service/AiModal";
+import Loader from "@/components/Sketeton/Loader";
 
 const TripPlanner = () => {
   const [days, setDays] = useState("");
   const [budget, setBudget] = useState("");
   const [members, setMembers] = useState("");
+  const { placeDetails } = usePlaceContext();
+  const [loader, setLoader] = useState(true);
 
   const handleBudgetSelect = (amount) => {
     setBudget(amount);
   };
 
-  console.log(days, budget, members);
+  useEffect(() => {
+    setTimeout(() => {
+      setLoader(false);
+    }, 2000);
+  });
 
-  return (
+  const handleGenerateAIFunction = async () => {
+    const FINAL_PROMPT = AI_PROMPT.replace(
+      "{Location}",
+      placeDetails?.result?.formatted_address
+    )
+      .replace("{days}", days)
+      .replace("{members}", members)
+      .replace("{budget}", budget);
+
+    console.log(FINAL_PROMPT);
+
+    const result = await chatSession.sendMessage(FINAL_PROMPT);
+    console.log(result?.response?.text());
+  };
+
+  return loader ? (
+    <Loader />
+  ) : (
     <div className="max-w-xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">AI Trip Planner</h1>
 
@@ -176,7 +203,10 @@ const TripPlanner = () => {
       </div>
 
       {/* Generate by AI Button */}
-      <button className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 mt-4">
+      <button
+        className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 mt-4"
+        onClick={handleGenerateAIFunction}
+      >
         Generate by AI
       </button>
     </div>

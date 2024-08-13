@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Loader from "@/components/Sketeton/Loader";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePlaceContext } from "../PlaceContext"; // Import the custom hook
+import { useAuth } from "@clerk/clerk-react";
 
 export const Create_trip = () => {
   const [loader, setLoader] = useState(true);
@@ -8,7 +10,9 @@ export const Create_trip = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState(null);
-  const [placeDetails, setPlaceDetails] = useState(null);
+  const { setPlaceDetails } = usePlaceContext();
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTimeout(() => {
@@ -57,6 +61,7 @@ export const Create_trip = () => {
     }
   };
 
+  // Handle suggestion click
   const handleSuggestionClick = (place_id) => {
     setSearchTerm(
       suggestions.find((suggestion) => suggestion.place_id === place_id)
@@ -64,9 +69,10 @@ export const Create_trip = () => {
     );
     setSuggestions([]);
     setIsSuggestionsVisible(false);
-    setSelectedPlaceId(place_id); // Set selectedPlaceId for later use
+    setSelectedPlaceId(place_id);
   };
 
+  // Fetch place details based on selected place ID
   const fetchPlaceDetails = async (placeId) => {
     const apiUrl = `https://google-place-autocomplete-and-place-info.p.rapidapi.com/maps/api/place/details/json?place_id=${encodeURIComponent(
       placeId
@@ -83,20 +89,33 @@ export const Create_trip = () => {
         },
       });
       const data = await response.json();
-      console.log("Place Details API Results:", data);
-      setPlaceDetails(data);
+      setPlaceDetails(data); // Set place details in context
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Handle form submission or button click
+  const handleAction = async () => {
+    if (!isSignedIn) {
+      // Redirect to sign-in page if the user is not signed in
+      navigate("/sign-in");
+      return;
+    }
+
     if (selectedPlaceId) {
-      fetchPlaceDetails(selectedPlaceId);
+      // Fetch place details and navigate to the details page
+      await fetchPlaceDetails(selectedPlaceId);
+      navigate("/create_trip/details");
     } else {
       console.log("No place selected");
     }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleAction();
   };
 
   return (
@@ -110,7 +129,7 @@ export const Create_trip = () => {
               Effortlessly plan and manage all your trips in one place!
             </p>
             <form
-              onSubmit={handleSubmit} // Use handleSubmit for form submission
+              onSubmit={handleSubmit}
               className="mt-8 flex flex-col md:flex-row items-center gap-4"
             >
               <div className="relative flex-grow">
@@ -129,7 +148,7 @@ export const Create_trip = () => {
                   />
                 </label>
                 {isSuggestionsVisible && (
-                  <ul className="absolute top-full left-0 -z-10 w-full bg-white border border-gray-300 mt-2 rounded-md shadow-md max-h-48 overflow-y-auto">
+                  <ul className="absolute top-full left-0 z-10 w-full bg-white border border-gray-300 mt-2 rounded-md shadow-md max-h-48 overflow-y-auto">
                     {suggestions.map((suggestion, index) => (
                       <li
                         key={index}
@@ -144,13 +163,12 @@ export const Create_trip = () => {
                   </ul>
                 )}
               </div>
-              <Link
-                to={"/create_trip/details"}
+              <button
                 type="submit"
                 className="w-full md:w-auto z-0 px-6 py-3 bg-black border-black text-white rounded-xl shadow-md transition-transform transform active:scale-95"
               >
                 <span className="text-sm font-semibold">Search</span>
-              </Link>
+              </button>
             </form>
           </div>
         </div>
