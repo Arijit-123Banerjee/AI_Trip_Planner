@@ -51,7 +51,8 @@ const ViewTripHotels = () => {
           </div>
         ))}
       </div>
-      <ViewTripItenary /> {/* Capitalize the component usage */}
+      <ViewTripItenary itineraryList={itinerary} />{" "}
+      {/* Capitalize the component usage */}
     </>
   );
 };
