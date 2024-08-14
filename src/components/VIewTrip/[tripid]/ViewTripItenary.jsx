@@ -1,9 +1,9 @@
-const viewTripItenary = () => {
+const ViewTripItenary = () => {
   return (
     <div>
-      <h1>hello</h1>
+      <h1>Hello</h1>
     </div>
   );
 };
 
-export default viewTripItenary;
+export default ViewTripItenary;
