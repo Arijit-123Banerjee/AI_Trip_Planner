@@ -4,6 +4,7 @@ import { AI_PROMPT } from "@/components/constant/Option";
 import { chatSession } from "@/Service/AiModal";
 import Loader from "@/components/Sketeton/Loader";
 import { useNavigate } from "react-router-dom";
+import { useTripPlan } from "@/components/TripPlanProvider";
 
 const TripPlanner = () => {
   const [days, setDays] = useState("");
@@ -12,6 +13,8 @@ const TripPlanner = () => {
   const { placeDetails } = usePlaceContext();
   const [initialLoader, setInitialLoader] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const { setTripPlan } = useTripPlan(); // Use context to set the trip plan
 
   const navigate = useNavigate();
 
@@ -26,7 +29,7 @@ const TripPlanner = () => {
   }, []);
 
   const handleGenerateAIFunction = async () => {
-    setLoading(true); // Show skeleton before generating AI response
+    setLoading(true);
 
     const FINAL_PROMPT = AI_PROMPT.replace(
       "{Location}",
@@ -37,26 +40,28 @@ const TripPlanner = () => {
       .replace("{budget}", budget);
 
     try {
+      localStorage.clear();
+
       const result = await chatSession.sendMessage(FINAL_PROMPT);
 
       if (result?.response?.text()) {
-        // Store the result in localStorage
-        sessionStorage.setItem(
-          "aiTripPlan",
-          JSON.stringify(result.response.text())
-        );
+        const aiTripPlan = result.response.text();
+
+        // Update context with the AI trip plan
+        setTripPlan(aiTripPlan);
+
+        sessionStorage.setItem("aiTripPlan", JSON.stringify(aiTripPlan));
         sessionStorage.setItem(
           "tripDetails",
           JSON.stringify({ days, budget, members })
         );
 
         setLoading(false);
-
         navigate(`/create_trip/details/${placeDetails?.result?.place_id}`);
       }
     } catch (error) {
       console.error("Error generating AI trip plan:", error);
-      setLoading(false); // Hide skeleton in case of an error
+      setLoading(false);
     }
   };
 
@@ -198,7 +203,7 @@ const TripPlanner = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M8.25 15a1.75 1.75 0 113.5 0v.875m-3.5 0v-.875a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM15.75 9a1.75 1.75 0 113.5 0v.875m-3.5 0V9a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM12 19.25v.875M12 19.25v-.875m0 0h.001"
+                d="M8.25 15a1.75 1.75 0 113.5 0v.875m-3.5 0v-.875a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM16.75 15a1.75 1.75 0 113.5 0v.875m-3.5 0v-.875a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875z"
               />
             </svg>
             <span>Friends</span>
@@ -220,7 +225,7 @@ const TripPlanner = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M15 11.25c0 1.519-1.231 2.75-2.75 2.75S9.5 12.769 9.5 11.25 10.731 8.5 12.25 8.5 15 9.731 15 11.25z"
+                d="M12 12c2.485 0 4.5 2.015 4.5 4.5S14.485 21 12 21s-4.5-2.015-4.5-4.5S9.515 12 12 12z"
               />
             </svg>
             <span>Family</span>
@@ -228,9 +233,10 @@ const TripPlanner = () => {
         </div>
       </div>
 
+      {/* Generate AI Trip Plan Button */}
       <button
         onClick={handleGenerateAIFunction}
-        className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+        className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
       >
         Generate by AI
       </button>

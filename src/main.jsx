@@ -10,7 +10,7 @@ import { PlaceProvider } from "@/PlaceContext.jsx";
 import AuthPage from "./components/auth/Auth.jsx";
 import Hero from "./components/Custom/Hero.jsx";
 import ViewTrip from "./components/VIewTrip/[tripid]/ViewTrip.jsx";
-
+import { TripPlanProvider } from "./components/TripPlanProvider.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,7 +35,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ClerkProvider publishableKey={clerkKey}>
       <PlaceProvider>
-        <RouterProvider router={router} />
+        <TripPlanProvider>
+          <RouterProvider router={router} />
+        </TripPlanProvider>
       </PlaceProvider>
     </ClerkProvider>
   </StrictMode>

@@ -1,6 +1,6 @@
 import { usePlaceContext } from "@/PlaceContext";
 import { Badge } from "@/components/ui/badge";
-
+import ViewTripHotels from "./viewTripHotels";
 const ViewTripHero = () => {
   const { placeDetails } = usePlaceContext();
 
@@ -27,6 +27,7 @@ const ViewTripHero = () => {
           {`Members: ${members}`}
         </Badge>
       </div>
+      <ViewTripHotels />
     </div>
   );
 };
