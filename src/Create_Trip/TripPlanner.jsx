@@ -3,13 +3,17 @@ import { usePlaceContext } from "@/PlaceContext";
 import { AI_PROMPT } from "@/components/constant/Option";
 import { chatSession } from "@/Service/AiModal";
 import Loader from "@/components/Sketeton/Loader";
+import { useNavigate } from "react-router-dom";
 
 const TripPlanner = () => {
   const [days, setDays] = useState("");
   const [budget, setBudget] = useState("");
   const [members, setMembers] = useState("");
   const { placeDetails } = usePlaceContext();
-  const [loader, setLoader] = useState(true);
+  const [initialLoader, setInitialLoader] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleBudgetSelect = (amount) => {
     setBudget(amount);
@@ -17,11 +21,13 @@ const TripPlanner = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      setLoader(false);
+      setInitialLoader(false);
     }, 2000);
-  });
+  }, []);
 
   const handleGenerateAIFunction = async () => {
+    setLoading(true); // Show skeleton before generating AI response
+
     const FINAL_PROMPT = AI_PROMPT.replace(
       "{Location}",
       placeDetails?.result?.formatted_address
@@ -30,15 +36,35 @@ const TripPlanner = () => {
       .replace("{members}", members)
       .replace("{budget}", budget);
 
-    console.log(FINAL_PROMPT);
+    try {
+      const result = await chatSession.sendMessage(FINAL_PROMPT);
 
-    const result = await chatSession.sendMessage(FINAL_PROMPT);
-    console.log(result?.response?.text());
+      if (result?.response?.text()) {
+        // Store the result in localStorage
+        sessionStorage.setItem(
+          "aiTripPlan",
+          JSON.stringify(result.response.text())
+        );
+        sessionStorage.setItem(
+          "tripDetails",
+          JSON.stringify({ days, budget, members })
+        );
+
+        setLoading(false);
+
+        navigate(`/create_trip/details/${placeDetails?.result?.place_id}`);
+      }
+    } catch (error) {
+      console.error("Error generating AI trip plan:", error);
+      setLoading(false); // Hide skeleton in case of an error
+    }
   };
 
-  return loader ? (
-    <Loader />
-  ) : (
+  if (initialLoader || loading) {
+    return <Loader />;
+  }
+
+  return (
     <div className="max-w-xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-center">AI Trip Planner</h1>
 
@@ -172,7 +198,7 @@ const TripPlanner = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M8.25 15a1.75 1.75 0 113.5 0v.875m-3.5 0v-.875a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM15.75 9a1.75 1.75 0 113.5 0v.875m-3.5 0V9a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM12 19.25v.875M12 8.25v.875M7.5 12v.875M16.5 12v.875"
+                d="M8.25 15a1.75 1.75 0 113.5 0v.875m-3.5 0v-.875a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM15.75 9a1.75 1.75 0 113.5 0v.875m-3.5 0V9a1.75 1.75 0 00-3.5 0v.875m3.5 0h-3.5m0 0v.875a1.75 1.75 0 003.5 0v-.875zM12 19.25v.875M12 19.25v-.875m0 0h.001"
               />
             </svg>
             <span>Friends</span>
@@ -194,7 +220,7 @@ const TripPlanner = () => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M14 10c0-2.21 1.79-4 4-4s4 1.79 4 4v2c0 1.1-.9 2-2 2h-8a2 2 0 01-2-2v-2z"
+                d="M15 11.25c0 1.519-1.231 2.75-2.75 2.75S9.5 12.769 9.5 11.25 10.731 8.5 12.25 8.5 15 9.731 15 11.25z"
               />
             </svg>
             <span>Family</span>
@@ -202,10 +228,9 @@ const TripPlanner = () => {
         </div>
       </div>
 
-      {/* Generate by AI Button */}
       <button
-        className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 mt-4"
         onClick={handleGenerateAIFunction}
+        className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
       >
         Generate by AI
       </button>

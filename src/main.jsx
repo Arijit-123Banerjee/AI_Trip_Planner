@@ -9,6 +9,7 @@ import TripPlanner from "./Create_Trip/TripPlanner.jsx";
 import { PlaceProvider } from "@/PlaceContext.jsx";
 import AuthPage from "./components/auth/Auth.jsx";
 import Hero from "./components/Custom/Hero.jsx";
+import ViewTrip from "./components/VIewTrip/[tripid]/ViewTrip.jsx";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: "/create_trip", element: <Create_trip /> },
       { path: "/create_trip/details", element: <TripPlanner /> },
       { path: "/sign-in", element: <AuthPage /> },
+      { path: "/create_trip/details/:tripid", element: <ViewTrip /> },
     ],
   },
 ]);
