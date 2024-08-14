@@ -1,6 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { useTripPlan } from "@/components/TripPlanProvider";
-import ViewTripItenary from "./ViewTripItenary";
 
 const ViewTripHotels = () => {
   const { tripPlan } = useTripPlan();
@@ -50,7 +50,6 @@ const ViewTripHotels = () => {
           </div>
         ))}
       </div>
-      <ViewTripItenary itineraryList={itinerary} />
     </>
   );
 };
