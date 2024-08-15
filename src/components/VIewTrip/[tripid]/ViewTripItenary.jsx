@@ -3,10 +3,11 @@ import { useState } from "react";
 
 // eslint-disable-next-line react/prop-types
 const ViewTripItenary = ({ itineraryList }) => {
+  console.log(itineraryList);
   return (
     <div className="h-screen">
-      <h2 className="font-bold text-center mt-20 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-        Your Perfect Routine
+      <h2 className="font-bold  text-center mt-20 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+        Crafting Your Perfect Daily Rhythm
       </h2>
       {itineraryList.map((day, dayIndex) => (
         <div key={dayIndex} className="text-center p-8">
@@ -28,7 +29,7 @@ const Accordion = ({ activity }) => {
       <h6 className="mb-0">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="relative flex items-center w-full p-4 font-semibold text-left transition-all ease-in border-b border-solid cursor-pointer border-slate-100 text-slate-700 rounded-t-1 group text-dark-500"
+          className="relative flex items-center w-full p-4 font-semibold text-left transition-all ease-in border-b border-solid cursor-pointer shadow-lg text-slate-700 rounded-t-1 group text-dark-500"
         >
           <span>{activity.timeOfDay}</span>
           <i
